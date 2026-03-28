@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy — Safe</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: #FFFFFF;
+            color: #1A1A1A;
+            line-height: 1.7;
+            font-size: 16px;
+        }
+        header {
+            background: #66B0F0;
+            padding: 24px 20px;
+            text-align: center;
+        }
+        header h1 {
+            color: #FFFFFF;
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+        }
+        .back-link {
+            display: block;
+            background: #F4F8FC;
+            padding: 12px 20px;
+            font-size: 14px;
+            color: #3A7BD5;
+            text-decoration: none;
+            border-bottom: 1px solid #E4EBF2;
+        }
+        .back-link:hover {
+            background: #E8F0FA;
+        }
+        main {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 32px 20px 64px;
+        }
+        .last-updated {
+            font-size: 14px;
+            color: #666666;
+            margin-bottom: 32px;
+        }
+        h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1A1A1A;
+            margin-top: 36px;
+            margin-bottom: 12px;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #66B0F0;
+        }
+        h3 {
+            font-size: 17px;
+            font-weight: 600;
+            color: #2A2A2A;
+            margin-top: 24px;
+            margin-bottom: 8px;
+        }
+        p {
+            margin-bottom: 14px;
+            color: #333333;
+        }
+        ul {
+            margin: 10px 0 14px 24px;
+            color: #333333;
+        }
+        ul li {
+            margin-bottom: 6px;
+        }
+        strong {
+            color: #1A1A1A;
+        }
+        a {
+            color: #3A7BD5;
+        }
+        .contact-box {
+            background: #F4F8FC;
+            border-left: 4px solid #66B0F0;
+            padding: 16px 20px;
+            margin: 24px 0;
+            border-radius: 0 6px 6px 0;
+        }
+        .contact-box p {
+            margin-bottom: 4px;
+        }
+        footer {
+            text-align: center;
+            padding: 24px 20px;
+            font-size: 13px;
+            color: #999999;
+            border-top: 1px solid #EEEEEE;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Privacy Policy</h1>
+    </header>
+    <a class="back-link" href="javascript:history.back()">&#8592; Back to app</a>
+    <main>
+        <p class="last-updated"><strong>Last updated:</strong> March 2026</p>
+
+        <p>Safe ("we", "us", "our", or "the app") is a personal safety application developed by an independent developer based in the United Kingdom. We are committed to protecting your privacy and being transparent about how your data is handled. This Privacy Policy explains what information we collect, how we use it, and the choices you have.</p>
+        <p>By using Safe, you agree to the practices described in this policy. If you do not agree, please do not use the app.</p>
+
+        <h2>1. Information We Collect</h2>
+
+        <h3>1.1 Information You Provide</h3>
+        <ul>
+            <li><strong>Your name</strong> — used to identify you in SOS alerts sent to your trusted contacts.</li>
+            <li><strong>Trusted contacts' names and phone numbers</strong> — provided by you so that the app can deliver SOS alerts on your behalf.</li>
+        </ul>
+
+        <h3>1.2 Information Collected Automatically</h3>
+        <ul>
+            <li><strong>GPS location data</strong> — collected <strong>only</strong> during active SOS alerts or safety timer events. Your location is never tracked in the background or at any other time.</li>
+        </ul>
+
+        <h3>1.3 Information We Do Not Collect</h3>
+        <ul>
+            <li>We do not use analytics or tracking SDKs.</li>
+            <li>We do not integrate advertising frameworks, Facebook SDK, or Google Analytics.</li>
+            <li>We do not collect device identifiers for advertising purposes.</li>
+            <li>We do not require you to create an account. The app uses on-device storage.</li>
+        </ul>
+
+        <h2>2. How We Use Your Information</h2>
+        <ul>
+            <li><strong>Delivering SOS alerts</strong> — your name, location, and a link to live tracking are sent to your chosen trusted contacts when you trigger an alert.</li>
+            <li><strong>Live location sharing</strong> — during an active SOS or timer event, your GPS location is transmitted to our backend service so your trusted contacts can view your real-time position.</li>
+            <li><strong>SMS messages</strong> — when you trigger an alert, the app composes an SMS via iOS Messages containing your location data. These messages are sent only to your chosen trusted contacts and are initiated by you through the iOS share sheet.</li>
+        </ul>
+
+        <h2>3. Location Data</h2>
+        <p>Your location data is central to how Safe keeps you protected, so we want to be especially clear about how it works:</p>
+        <ul>
+            <li>Location data is collected <strong>only</strong> while an SOS alert or safety timer is active.</li>
+            <li>Location data is transmitted to our backend (hosted on Supabase) to enable live tracking by your trusted contacts.</li>
+            <li>When your alert ends, location tracking stops and the associated location data is <strong>automatically deactivated</strong>.</li>
+            <li>Location data is <strong>never sold</strong> and <strong>never shared with third parties</strong>.</li>
+            <li>The only people who can see your location are the trusted contacts you have chosen.</li>
+        </ul>
+
+        <h2>4. Audio Recording (Future Feature)</h2>
+        <p>A premium feature (not yet active) may allow the app to record a short 60-second audio clip when an SOS alert is triggered. If and when this feature is enabled:</p>
+        <ul>
+            <li>Recording will only occur during an active SOS event.</li>
+            <li>You will be clearly informed before the feature is activated and will need to grant microphone permission.</li>
+            <li>Audio clips will be stored securely and treated with the same care as location data.</li>
+        </ul>
+        <p>This Privacy Policy will be updated before any audio recording feature goes live.</p>
+
+        <h2>5. Data Storage and Retention</h2>
+        <ul>
+            <li><strong>On-device storage</strong> — your name and trusted contacts are stored locally on your device.</li>
+            <li><strong>Supabase</strong> — trusted contacts' details are also stored in Supabase (a cloud database service) to enable alert delivery. Location data transmitted during active alerts is stored on Supabase and automatically deactivated when the alert ends.</li>
+            <li><strong>No account</strong> — we do not require you to create a user account. Your data is associated with your device rather than a personal login.</li>
+        </ul>
+
+        <h2>6. Third-Party Services</h2>
+        <p>We use a limited number of third-party services:</p>
+        <ul>
+            <li><strong>Supabase</strong> — cloud database and backend infrastructure used to store contact information and location data during active alerts. Supabase's privacy practices are governed by their own privacy policy.</li>
+            <li><strong>Apple (App Store)</strong> — if you subscribe to Safe Premium, payment is processed entirely by Apple through the App Store. We do not receive or store your payment details.</li>
+            <li><strong>Apple (iOS Messages)</strong> — SMS alerts are sent through the native iOS Messages framework. Message content passes through your mobile carrier.</li>
+        </ul>
+        <p>We do not share your data with any other third parties, advertisers, or data brokers.</p>
+
+        <h2>7. Children's Privacy</h2>
+        <p>Safe is designed with the safety of women, teenagers, and children in mind. We recognise that users under the age of 18 may use this app.</p>
+        <ul>
+            <li>We recommend that children and teenagers use Safe with <strong>parental or guardian consent</strong>.</li>
+            <li>We do not knowingly collect more information from minors than is necessary to provide the service.</li>
+            <li>Parents or guardians may contact us at any time to review, delete, or manage data associated with their child's use of the app.</li>
+        </ul>
+        <p>If you believe a child is using Safe without appropriate parental consent, please contact us immediately.</p>
+
+        <h2>8. Your Rights (GDPR)</h2>
+        <p>If you are located in the United Kingdom or European Economic Area, you have the following rights under the UK General Data Protection Regulation (UK GDPR) and the Data Protection Act 2018:</p>
+        <ul>
+            <li><strong>Right of access</strong> — you can request a copy of the personal data we hold about you.</li>
+            <li><strong>Right to rectification</strong> — you can update or correct your information within the app at any time.</li>
+            <li><strong>Right to erasure</strong> — you can delete your trusted contacts and personal data through the app, or contact us to request full deletion.</li>
+            <li><strong>Right to restrict processing</strong> — you can ask us to limit how we use your data.</li>
+            <li><strong>Right to data portability</strong> — you can request your data in a portable format.</li>
+            <li><strong>Right to object</strong> — you can object to our processing of your personal data.</li>
+        </ul>
+        <p>To exercise any of these rights, please contact us using the details below. We will respond within 30 days.</p>
+
+        <h3>Legal Basis for Processing</h3>
+        <p>We process your data on the following legal bases:</p>
+        <ul>
+            <li><strong>Consent</strong> — you choose to provide your information and grant location permissions.</li>
+            <li><strong>Legitimate interest</strong> — processing is necessary to deliver the core safety features of the app.</li>
+            <li><strong>Contract</strong> — if you subscribe to Safe Premium, processing is necessary to fulfil the subscription service.</li>
+        </ul>
+
+        <h2>9. Data Security</h2>
+        <p>We take reasonable technical and organisational measures to protect your personal data from unauthorised access, loss, or misuse. Data transmitted between the app and our backend is encrypted in transit. However, no system can guarantee absolute security, and you use the app at your own risk.</p>
+
+        <h2>10. Changes to This Policy</h2>
+        <p>We may update this Privacy Policy from time to time. If we make material changes, we will notify you through the app or by other appropriate means. The "Last updated" date at the top of this page indicates when the policy was most recently revised.</p>
+
+        <h2>11. Contact Us</h2>
+        <p>If you have any questions, concerns, or requests regarding this Privacy Policy or your personal data, please contact us:</p>
+        <div class="contact-box">
+            <p><strong>Safe</strong></p>
+            <p>Email: <a href="mailto:support@safeapp.co.uk">support@safeapp.co.uk</a></p>
+        </div>
+    </main>
+    <footer>
+        &copy; 2026 Safe. All rights reserved.
+    </footer>
+</body>
+</html>
