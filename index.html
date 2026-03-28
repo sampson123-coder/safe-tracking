@@ -4,43 +4,37 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>Safe - Live Tracking</title>
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css" />
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
-
   #header {
     position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
     background: #dc2626; color: #fff;
     padding: 14px 16px; text-align: center;
     box-shadow: 0 2px 8px rgba(0,0,0,0.3);
   }
-  #header h1 { font-size: 16px; font-weight: 700; letter-spacing: 0.5px; }
-  #header p  { font-size: 12px; opacity: 0.9; margin-top: 4px; }
-
+  #header h1 { font-size: 16px; font-weight: 700; }
+  #header p { font-size: 12px; opacity: 0.9; margin-top: 4px; }
   #status-bar {
     position: fixed; bottom: 0; left: 0; right: 0; z-index: 1000;
     background: #1e293b; color: #94a3b8;
     padding: 10px 16px; text-align: center; font-size: 13px;
   }
   #status-bar.inactive { background: #7f1d1d; color: #fca5a5; }
-
-  #map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; }
-
+  #map { position: absolute; top: 56px; left: 0; right: 0; bottom: 40px; }
   #loading {
     position: fixed; inset: 0; z-index: 2000;
     background: #0f172a; color: #e2e8f0;
     display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    font-size: 18px;
+    align-items: center; justify-content: center; font-size: 18px;
   }
-  #loading .spinner {
+  .spinner {
     width: 40px; height: 40px; border: 4px solid #334155;
     border-top-color: #dc2626; border-radius: 50%;
     animation: spin 0.8s linear infinite; margin-bottom: 16px;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
-
   #error-screen {
     position: fixed; inset: 0; z-index: 2000;
     background: #0f172a; color: #e2e8f0;
@@ -53,221 +47,136 @@
 </head>
 <body>
 
-<div id="loading">
-  <div class="spinner"></div>
-  <span>Loading tracking data...</span>
-</div>
-
-<div id="error-screen">
-  <h2>Unable to Load</h2>
-  <p id="error-msg">This tracking link may be invalid or expired.</p>
-</div>
-
-<div id="header">
-  <h1 id="alert-title">SAFE ALERT</h1>
-  <p id="alert-time"></p>
-</div>
-
+<div id="loading"><div class="spinner"></div><span>Loading tracking data...</span></div>
+<div id="error-screen"><h2>Unable to Load</h2><p id="error-msg"></p></div>
+<div id="header"><h1 id="alert-title">SAFE ALERT</h1><p id="alert-time"></p></div>
 <div id="map"></div>
+<div id="status-bar"><span id="status-text">Connecting...</span></div>
 
-<div id="status-bar">
-  <span id="status-text">Connecting...</span>
-</div>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
 <script>
-(function() {
-  const SUPABASE_URL = 'https://vzilxgzcuqdutyayycgy.supabase.co';
-  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ6aWx4Z3pjdXFkdXR5YXl5Y2d5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MTIzNjQsImV4cCI6MjA5MDI4ODM2NH0.YOH2WhNpY9m0-Au36UU_89tPJhN7wQRNIazBH_KebWY';
+// Get token from URL
+var params = new URLSearchParams(window.location.search);
+var shareToken = params.get('token');
 
-  const params = new URLSearchParams(window.location.search);
-  const shareToken = params.get('token');
+if (!shareToken) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('error-screen').style.display = 'flex';
+  document.getElementById('error-msg').textContent = 'No tracking token provided.';
+} else {
+  startTracking(shareToken);
+}
 
-  if (!shareToken) {
-    showError('No tracking token provided.');
-    return;
-  }
+function startTracking(token) {
+  var SUPA_URL = 'https://vzilxgzcuqdutyayycgy.supabase.co';
+  var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ6aWx4Z3pjdXFkdXR5YXl5Y2d5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ3MTIzNjQsImV4cCI6MjA5MDI4ODM2NH0.YOH2WhNpY9m0-Au36UU_89tPJhN7wQRNIazBH_KebWY';
+  var headers = { 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + SUPA_KEY };
 
-  // Supabase JS v2 UMD exposes as window.supabase
-  const { createClient } = window.supabase;
-  const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  var map, marker, polyline, trail = [], lastUpdate = null, eventId = null;
 
-  let map, marker, polyline;
-  let trail = [];
-  let lastUpdateTime = null;
-  let eventId = null;
-  let timerInterval = null;
-
-  async function init() {
-    try {
-      // Fetch the SOS event by share_token
-      const { data: events, error: evErr } = await supabase
-        .from('sos_events')
-        .select('*')
-        .eq('share_token', shareToken)
-        .limit(1);
-
-      if (evErr) throw evErr;
+  // Fetch the SOS event
+  fetch(SUPA_URL + '/rest/v1/sos_events?share_token=eq.' + token + '&limit=1', { headers: headers })
+    .then(function(r) { return r.json(); })
+    .then(function(events) {
       if (!events || events.length === 0) {
         showError('This tracking link is invalid or has expired.');
         return;
       }
 
-      const event = events[0];
-      eventId = event.id;
+      var ev = events[0];
+      eventId = ev.id;
 
       // Update header
-      const name = event.user_name || 'Someone';
-      document.getElementById('alert-title').textContent = 'SAFE ALERT: ' + name + ' may need help';
-      const triggeredAt = new Date(event.triggered_at);
-      document.getElementById('alert-time').textContent = 'Triggered ' + formatTime(triggeredAt);
+      document.getElementById('alert-title').textContent = 'SAFE ALERT: ' + (ev.user_name || 'Someone') + ' may need help';
+      var t = new Date(ev.triggered_at);
+      document.getElementById('alert-time').textContent = 'Triggered ' + t.toLocaleString();
 
-      if (!event.is_active) {
-        showInactive();
+      // Setup map
+      var lat = ev.initial_lat || 51.5;
+      var lng = ev.initial_lng || -0.12;
+
+      map = L.map('map').setView([lat, lng], 16);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '© OpenStreetMap',
+        maxZoom: 19
+      }).addTo(map);
+
+      var icon = L.divIcon({
+        className: '',
+        html: '<div style="width:18px;height:18px;background:#dc2626;border:3px solid #fff;border-radius:50%;box-shadow:0 0 8px rgba(220,38,38,0.6);"></div>',
+        iconSize: [18, 18], iconAnchor: [9, 9]
+      });
+      marker = L.marker([lat, lng], { icon: icon }).addTo(map);
+      polyline = L.polyline([], { color: '#dc2626', weight: 3, opacity: 0.7 }).addTo(map);
+
+      if (!ev.is_active) {
+        document.getElementById('status-bar').className = 'inactive';
+        document.getElementById('status-text').textContent = 'Alert is no longer active';
+        document.getElementById('header').style.background = '#64748b';
       }
 
-      // Initialize map
-      const initLat = event.initial_lat || 0;
-      const initLng = event.initial_lng || 0;
-      setupMap(initLat, initLng);
-
-      // Fetch existing location updates
-      const { data: locations, error: locErr } = await supabase
-        .from('location_updates')
-        .select('*')
-        .eq('sos_event_id', eventId)
-        .order('recorded_at', { ascending: true });
-
-      if (!locErr && locations && locations.length > 0) {
-        for (const loc of locations) {
-          addPoint(loc.lat, loc.lng, new Date(loc.recorded_at));
+      // Fetch location updates
+      return fetch(SUPA_URL + '/rest/v1/location_updates?sos_event_id=eq.' + eventId + '&order=recorded_at.asc', { headers: headers });
+    })
+    .then(function(r) { if (r) return r.json(); })
+    .then(function(locations) {
+      if (locations && locations.length > 0) {
+        for (var i = 0; i < locations.length; i++) {
+          addPoint(locations[i].lat, locations[i].lng, new Date(locations[i].recorded_at));
         }
-      } else {
-        // Use initial location as first point
-        addPoint(initLat, initLng, triggeredAt);
       }
 
       // Hide loading
       document.getElementById('loading').style.display = 'none';
 
-      // Start last-updated timer
-      timerInterval = setInterval(updateStatusTimer, 1000);
-
-      // Subscribe to realtime inserts on location_updates
-      supabase
-        .channel('location-updates')
-        .on(
-          'postgres_changes',
-          {
-            event: 'INSERT',
-            schema: 'public',
-            table: 'location_updates',
-            filter: 'sos_event_id=eq.' + eventId
-          },
-          (payload) => {
-            const loc = payload.new;
-            addPoint(loc.lat, loc.lng, new Date(loc.recorded_at));
-          }
-        )
-        .subscribe();
-
-      // Subscribe to updates on sos_events for deactivation
-      supabase
-        .channel('event-status')
-        .on(
-          'postgres_changes',
-          {
-            event: 'UPDATE',
-            schema: 'public',
-            table: 'sos_events',
-            filter: 'id=eq.' + eventId
-          },
-          (payload) => {
-            if (payload.new && payload.new.is_active === false) {
-              showInactive();
-            }
-          }
-        )
-        .subscribe();
-
-    } catch (err) {
+      // Poll for new locations every 5 seconds (simpler than realtime)
+      setInterval(function() { pollLocations(); }, 5000);
+      setInterval(updateTimer, 1000);
+    })
+    .catch(function(err) {
       console.error(err);
-      showError('Failed to load tracking data. Please try again.');
-    }
-  }
-
-  function setupMap(lat, lng) {
-    map = L.map('map', { zoomControl: true }).setView([lat, lng], 16);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors',
-      maxZoom: 19
-    }).addTo(map);
-
-    // Red pulsing icon for marker
-    const icon = L.divIcon({
-      className: '',
-      html: '<div style="width:18px;height:18px;background:#dc2626;border:3px solid #fff;border-radius:50%;box-shadow:0 0 8px rgba(220,38,38,0.6);"></div>',
-      iconSize: [18, 18],
-      iconAnchor: [9, 9]
+      showError('Failed to load tracking data.');
     });
-    marker = L.marker([lat, lng], { icon: icon }).addTo(map);
 
-    polyline = L.polyline([], { color: '#dc2626', weight: 3, opacity: 0.7 }).addTo(map);
-
-    // Offset map for header/status bar
-    map.invalidateSize();
+  function pollLocations() {
+    if (!eventId) return;
+    var since = lastUpdate ? lastUpdate.toISOString() : '2000-01-01T00:00:00Z';
+    fetch(SUPA_URL + '/rest/v1/location_updates?sos_event_id=eq.' + eventId + '&recorded_at=gt.' + since + '&order=recorded_at.asc', { headers: headers })
+      .then(function(r) { return r.json(); })
+      .then(function(locs) {
+        if (locs) {
+          for (var i = 0; i < locs.length; i++) {
+            addPoint(locs[i].lat, locs[i].lng, new Date(locs[i].recorded_at));
+          }
+        }
+      })
+      .catch(function() {});
   }
 
   function addPoint(lat, lng, time) {
-    const latlng = [lat, lng];
-    trail.push(latlng);
-    lastUpdateTime = time;
-
-    if (marker) marker.setLatLng(latlng);
+    trail.push([lat, lng]);
+    lastUpdate = time;
+    if (marker) marker.setLatLng([lat, lng]);
     if (polyline) polyline.setLatLngs(trail);
-    if (map) map.panTo(latlng);
-
-    updateStatusTimer();
+    if (map) map.panTo([lat, lng]);
   }
 
-  function updateStatusTimer() {
-    if (!lastUpdateTime) return;
-    const seconds = Math.floor((Date.now() - lastUpdateTime.getTime()) / 1000);
-    let text;
-    if (seconds < 5) {
-      text = 'Last updated: just now';
-    } else if (seconds < 60) {
-      text = 'Last updated: ' + seconds + 's ago';
-    } else {
-      const mins = Math.floor(seconds / 60);
-      text = 'Last updated: ' + mins + 'm ' + (seconds % 60) + 's ago';
-    }
+  function updateTimer() {
+    if (!lastUpdate) return;
+    var secs = Math.floor((Date.now() - lastUpdate.getTime()) / 1000);
+    var text;
+    if (secs < 5) text = 'Last updated: just now';
+    else if (secs < 60) text = 'Last updated: ' + secs + 's ago';
+    else text = 'Last updated: ' + Math.floor(secs/60) + 'm ' + (secs%60) + 's ago';
     document.getElementById('status-text').textContent = text;
   }
+}
 
-  function showInactive() {
-    const bar = document.getElementById('status-bar');
-    bar.classList.add('inactive');
-    document.getElementById('status-text').textContent = 'Alert is no longer active';
-    document.getElementById('header').style.background = '#64748b';
-    if (timerInterval) clearInterval(timerInterval);
-  }
-
-  function showError(msg) {
-    document.getElementById('loading').style.display = 'none';
-    const errScreen = document.getElementById('error-screen');
-    errScreen.style.display = 'flex';
-    document.getElementById('error-msg').textContent = msg;
-  }
-
-  function formatTime(date) {
-    const opts = { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' };
-    return date.toLocaleDateString(undefined, opts);
-  }
-
-  init();
-})();
+function showError(msg) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('error-screen').style.display = 'flex';
+  document.getElementById('error-msg').textContent = msg;
+}
 </script>
 </body>
 </html>
