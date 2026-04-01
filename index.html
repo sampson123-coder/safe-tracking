@@ -47,7 +47,7 @@
   }
   .action-btn:active { opacity: 0.85; }
   .btn-maps { background: #2563eb; }
-  .btn-uber { background: #000; }
+  .btn-ride { background: #000; }
 </style>
 </head>
 <body>
@@ -56,12 +56,16 @@
 <div id="header"><h1 id="alert-title">SAFE ALERT</h1><p id="alert-time"></p></div>
 <div id="map"></div>
 <div id="action-buttons">
-  <button class="action-btn btn-uber" onclick="openUber()">Send them an Uber</button>
-  <div id="uber-hint" style="display:none; background:rgba(0,0,0,0.85); color:#fff; border-radius:12px; padding:10px 14px; font-size:12px; max-width:240px; text-align:left; box-shadow:0 2px 12px rgba(0,0,0,0.3);">
-    <div style="font-weight:600; margin-bottom:6px;">Paste this as pickup location:</div>
-    <div onclick="copyCoords()" style="background:#1e293b; border-radius:8px; padding:8px 12px; display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
-      <span id="coord-text" style="font-family:monospace; font-size:13px;"></span>
-      <span id="copy-label" style="color:#60a5fa; font-weight:600; margin-left:10px; font-size:12px;">Copy</span>
+  <button class="action-btn btn-ride" onclick="showRidePanel()">Send them an Uber/Bolt</button>
+  <div id="ride-panel" style="display:none; background:rgba(0,0,0,0.92); color:#fff; border-radius:14px; padding:14px 16px; font-size:13px; max-width:260px; text-align:left; box-shadow:0 2px 16px rgba(0,0,0,0.4);">
+    <div style="font-weight:600; margin-bottom:8px;">Their location — copy and paste into pickup or dropoff:</div>
+    <div onclick="copyCoords()" style="background:#1e293b; border-radius:10px; padding:10px 14px; display:flex; align-items:center; justify-content:space-between; cursor:pointer; margin-bottom:12px;">
+      <span id="coord-text" style="font-family:monospace; font-size:14px;"></span>
+      <span id="copy-label" style="color:#60a5fa; font-weight:700; margin-left:10px; font-size:13px;">Copy</span>
+    </div>
+    <div style="display:flex; gap:8px;">
+      <button onclick="openUber()" style="flex:1; background:#000; color:#fff; border:none; border-radius:10px; padding:12px; font-size:14px; font-weight:600; cursor:pointer;">Open Uber</button>
+      <button onclick="openBolt()" style="flex:1; background:#34d186; color:#000; border:none; border-radius:10px; padding:12px; font-size:14px; font-weight:600; cursor:pointer;">Open Bolt</button>
     </div>
   </div>
   <button class="action-btn btn-maps" onclick="openInMaps()">Open in Maps</button>
@@ -190,24 +194,10 @@ function openInMaps() {
   }
 }
 
-function openUber() {
-  // Show the coordinate hint
+function showRidePanel() {
+  var panel = document.getElementById('ride-panel');
   document.getElementById('coord-text').textContent = currentLat.toFixed(6) + ', ' + currentLng.toFixed(6);
-  document.getElementById('uber-hint').style.display = 'block';
-
-  // Open Uber after a short delay so they see the hint
-  setTimeout(function() {
-    var uberApp = 'uber://?action=setPickup&dropoff[latitude]=' + currentLat + '&dropoff[longitude]=' + currentLng + '&dropoff[nickname]=Their%20Location';
-    var uberWeb = 'https://m.uber.com/ul/?action=setPickup&dropoff[latitude]=' + currentLat + '&dropoff[longitude]=' + currentLng + '&dropoff[nickname]=Their%20Location';
-
-    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-    if (isIOS) {
-      window.location.href = uberApp;
-      setTimeout(function() { window.location.href = uberWeb; }, 1500);
-    } else {
-      window.location.href = uberWeb;
-    }
-  }, 800);
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
 }
 
 function copyCoords() {
@@ -216,6 +206,30 @@ function copyCoords() {
     document.getElementById('copy-label').textContent = 'Copied!';
     setTimeout(function() { document.getElementById('copy-label').textContent = 'Copy'; }, 2000);
   });
+}
+
+function openUber() {
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  var uberApp = 'uber://';
+  var uberWeb = 'https://m.uber.com';
+  if (isIOS) {
+    window.location.href = uberApp;
+    setTimeout(function() { window.location.href = uberWeb; }, 1500);
+  } else {
+    window.location.href = uberWeb;
+  }
+}
+
+function openBolt() {
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  var boltApp = 'bolt://';
+  var boltWeb = 'https://bolt.eu';
+  if (isIOS) {
+    window.location.href = boltApp;
+    setTimeout(function() { window.location.href = boltWeb; }, 1500);
+  } else {
+    window.location.href = boltWeb;
+  }
 }
 
 </script>
