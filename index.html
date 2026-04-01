@@ -48,7 +48,6 @@
   .action-btn:active { opacity: 0.85; }
   .btn-maps { background: #2563eb; }
   .btn-uber { background: #000; }
-  .btn-bolt { background: #34d186; color: #000; }
 </style>
 </head>
 <body>
@@ -58,7 +57,6 @@
 <div id="map"></div>
 <div id="action-buttons">
   <button class="action-btn btn-uber" onclick="openUber()">Send them an Uber</button>
-  <button class="action-btn btn-bolt" onclick="openBolt()">Send them a Bolt</button>
   <button class="action-btn btn-maps" onclick="openInMaps()">Open in Maps</button>
 </div>
 <div id="status-bar"><span id="status-text">Connecting...</span></div>
@@ -200,18 +198,6 @@ function openUber() {
   }
 }
 
-function openBolt() {
-  // Bolt deep link with destination coordinates
-  var boltApp = 'bolt://ride?dropoff_lat=' + currentLat + '&dropoff_lng=' + currentLng;
-  var boltWebFallback = 'https://m.bolt.eu/action/ride?dropoff_lat=' + currentLat + '&dropoff_lng=' + currentLng;
-
-  // Try app first
-  window.location.href = boltApp;
-  // If app doesn't open, try Google Maps directions as fallback (Bolt web doesn't support deep links well)
-  setTimeout(function() {
-    window.location.href = 'https://www.google.com/maps/dir/?api=1&destination=' + currentLat + ',' + currentLng + '&travelmode=driving';
-  }, 2000);
-}
 </script>
 </body>
 </html>
