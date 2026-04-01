@@ -34,15 +34,21 @@
     animation: spin 0.8s linear infinite; margin-bottom: 16px;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
-  #open-maps {
+  #action-buttons {
     position: fixed; bottom: 52px; right: 16px; z-index: 1000;
-    background: #2563eb; color: #fff;
+    display: none; flex-direction: column; gap: 10px; align-items: flex-end;
+  }
+  .action-btn {
     border: none; border-radius: 12px;
     padding: 12px 18px; font-size: 14px; font-weight: 600;
     box-shadow: 0 2px 12px rgba(0,0,0,0.3);
-    cursor: pointer; display: none;
+    cursor: pointer; display: flex; align-items: center; gap: 8px;
+    color: #fff;
   }
-  #open-maps:active { background: #1d4ed8; }
+  .action-btn:active { opacity: 0.85; }
+  .btn-maps { background: #2563eb; }
+  .btn-uber { background: #000; }
+  .btn-bolt { background: #34d186; color: #000; }
 </style>
 </head>
 <body>
@@ -50,7 +56,11 @@
 <div id="loading"><div class="spinner"></div><span id="load-text">Loading tracking data...</span></div>
 <div id="header"><h1 id="alert-title">SAFE ALERT</h1><p id="alert-time"></p></div>
 <div id="map"></div>
-<button id="open-maps" onclick="openInMaps()">Open in Maps</button>
+<div id="action-buttons">
+  <button class="action-btn btn-uber" onclick="openUber()">Send them an Uber</button>
+  <button class="action-btn btn-bolt" onclick="openBolt()">Send them a Bolt</button>
+  <button class="action-btn btn-maps" onclick="openInMaps()">Open in Maps</button>
+</div>
 <div id="status-bar"><span id="status-text">Connecting...</span></div>
 
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
@@ -119,7 +129,7 @@ async function load() {
     }
 
     document.getElementById('loading').style.display = 'none';
-    document.getElementById('open-maps').style.display = 'block';
+    document.getElementById('action-buttons').style.display = 'flex';
 
     if (!ev.is_active) {
       document.getElementById('status-text').textContent = 'Alert is no longer active';
@@ -169,11 +179,38 @@ function updateTimer() {
 function openInMaps() {
   var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   if (isIOS) {
-    // Apple Maps
     window.location.href = 'maps://maps.apple.com/?q=' + currentLat + ',' + currentLng;
   } else {
-    // Google Maps
     window.location.href = 'https://www.google.com/maps/search/?api=1&query=' + currentLat + ',' + currentLng;
+  }
+}
+
+function openUber() {
+  // Try Uber app deep link first, fallback to web
+  var uberApp = 'uber://?action=setPickup&dropoff[latitude]=' + currentLat + '&dropoff[longitude]=' + currentLng + '&dropoff[nickname]=SOS%20Location';
+  var uberWeb = 'https://m.uber.com/ul/?action=setPickup&dropoff[latitude]=' + currentLat + '&dropoff[longitude]=' + currentLng + '&dropoff[nickname]=SOS%20Location';
+
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (isIOS) {
+    // Try app, fallback to web after short delay
+    window.location.href = uberApp;
+    setTimeout(function() { window.location.href = uberWeb; }, 1500);
+  } else {
+    window.location.href = uberWeb;
+  }
+}
+
+function openBolt() {
+  // Try Bolt app deep link first, fallback to web
+  var boltApp = 'bolt://ride?destination_lat=' + currentLat + '&destination_lng=' + currentLng;
+  var boltWeb = 'https://bolt.eu/en/?destination_lat=' + currentLat + '&destination_lng=' + currentLng;
+
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (isIOS) {
+    window.location.href = boltApp;
+    setTimeout(function() { window.location.href = boltWeb; }, 1500);
+  } else {
+    window.location.href = boltWeb;
   }
 }
 </script>
