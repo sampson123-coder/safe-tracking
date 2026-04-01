@@ -185,8 +185,8 @@ function openInMaps() {
 
 function openUber() {
   // Try Uber app deep link first, fallback to web
-  var uberApp = 'uber://?action=setPickup&pickup[latitude]=' + currentLat + '&pickup[longitude]=' + currentLng + '&pickup[nickname]=SOS%20Location&pickup[formatted_address]=SOS%20Location';
-  var uberWeb = 'https://m.uber.com/ul/?action=setPickup&pickup[latitude]=' + currentLat + '&pickup[longitude]=' + currentLng + '&pickup[nickname]=SOS%20Location';
+  var uberApp = 'uber://?action=setPickup&dropoff[latitude]=' + currentLat + '&dropoff[longitude]=' + currentLng + '&dropoff[nickname]=Their%20Location';
+  var uberWeb = 'https://m.uber.com/ul/?action=setPickup&dropoff[latitude]=' + currentLat + '&dropoff[longitude]=' + currentLng + '&dropoff[nickname]=Their%20Location';
 
   var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   if (isIOS) {
