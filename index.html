@@ -34,6 +34,15 @@
     animation: spin 0.8s linear infinite; margin-bottom: 16px;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
+  #open-maps {
+    position: fixed; bottom: 52px; right: 16px; z-index: 1000;
+    background: #2563eb; color: #fff;
+    border: none; border-radius: 12px;
+    padding: 12px 18px; font-size: 14px; font-weight: 600;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    cursor: pointer; display: none;
+  }
+  #open-maps:active { background: #1d4ed8; }
 </style>
 </head>
 <body>
@@ -41,6 +50,7 @@
 <div id="loading"><div class="spinner"></div><span id="load-text">Loading tracking data...</span></div>
 <div id="header"><h1 id="alert-title">SAFE ALERT</h1><p id="alert-time"></p></div>
 <div id="map"></div>
+<button id="open-maps" onclick="openInMaps()">Open in Maps</button>
 <div id="status-bar"><span id="status-text">Connecting...</span></div>
 
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
@@ -51,6 +61,7 @@ var HDRS = { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY };
 
 var token = new URLSearchParams(window.location.search).get('token');
 var map, marker, polyline, trail = [], lastUpdate = null, eventId = null;
+var currentLat = 0, currentLng = 0;
 
 if (!token) {
   document.getElementById('load-text').textContent = 'Error: No tracking token provided.';
@@ -80,6 +91,8 @@ async function load() {
 
     var lat = ev.initial_lat || 51.5;
     var lng = ev.initial_lng || -0.12;
+    currentLat = lat;
+    currentLng = lng;
 
     map = L.map('map').setView([lat, lng], 16);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -94,7 +107,6 @@ async function load() {
     marker = L.marker([lat, lng], { icon: icon }).addTo(map);
     polyline = L.polyline([], { color: '#dc2626', weight: 3, opacity: 0.7 }).addTo(map);
 
-    // Fetch location history
     var res2 = await fetch(SUPA + '/location_updates?sos_event_id=eq.' + eventId + '&order=recorded_at.asc', { headers: HDRS });
     var locs = await res2.json();
 
@@ -106,14 +118,13 @@ async function load() {
       addPoint(lat, lng, new Date(ev.triggered_at));
     }
 
-    // Hide loading
     document.getElementById('loading').style.display = 'none';
+    document.getElementById('open-maps').style.display = 'block';
 
     if (!ev.is_active) {
       document.getElementById('status-text').textContent = 'Alert is no longer active';
       document.getElementById('header').style.background = '#64748b';
     } else {
-      // Poll for updates every 5 seconds
       setInterval(poll, 5000);
       setInterval(updateTimer, 1000);
     }
@@ -140,6 +151,8 @@ async function poll() {
 function addPoint(lat, lng, time) {
   trail.push([lat, lng]);
   lastUpdate = time;
+  currentLat = lat;
+  currentLng = lng;
   if (marker) marker.setLatLng([lat, lng]);
   if (polyline) polyline.setLatLngs(trail);
   if (map) map.panTo([lat, lng]);
@@ -151,6 +164,17 @@ function updateTimer() {
   var s = Math.floor((Date.now() - lastUpdate.getTime()) / 1000);
   var t = s < 5 ? 'just now' : s < 60 ? s + 's ago' : Math.floor(s/60) + 'm ' + (s%60) + 's ago';
   document.getElementById('status-text').textContent = 'Last updated: ' + t;
+}
+
+function openInMaps() {
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  if (isIOS) {
+    // Apple Maps
+    window.location.href = 'maps://maps.apple.com/?q=' + currentLat + ',' + currentLng;
+  } else {
+    // Google Maps
+    window.location.href = 'https://www.google.com/maps/search/?api=1&query=' + currentLat + ',' + currentLng;
+  }
 }
 </script>
 </body>
