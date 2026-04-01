@@ -198,6 +198,15 @@ function showRidePanel() {
   var panel = document.getElementById('ride-panel');
   document.getElementById('coord-text').textContent = currentLat.toFixed(6) + ', ' + currentLng.toFixed(6);
   panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+
+  // Keep coordinates updated while panel is open
+  if (!window.coordUpdateInterval) {
+    window.coordUpdateInterval = setInterval(function() {
+      if (document.getElementById('ride-panel').style.display !== 'none') {
+        document.getElementById('coord-text').textContent = currentLat.toFixed(6) + ', ' + currentLng.toFixed(6);
+      }
+    }, 2000);
+  }
 }
 
 function copyCoords() {
