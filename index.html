@@ -57,6 +57,13 @@
 <div id="map"></div>
 <div id="action-buttons">
   <button class="action-btn btn-uber" onclick="openUber()">Send them an Uber</button>
+  <div id="uber-hint" style="display:none; background:rgba(0,0,0,0.85); color:#fff; border-radius:12px; padding:10px 14px; font-size:12px; max-width:240px; text-align:left; box-shadow:0 2px 12px rgba(0,0,0,0.3);">
+    <div style="font-weight:600; margin-bottom:6px;">Paste this as pickup location:</div>
+    <div onclick="copyCoords()" style="background:#1e293b; border-radius:8px; padding:8px 12px; display:flex; align-items:center; justify-content:space-between; cursor:pointer;">
+      <span id="coord-text" style="font-family:monospace; font-size:13px;"></span>
+      <span id="copy-label" style="color:#60a5fa; font-weight:600; margin-left:10px; font-size:12px;">Copy</span>
+    </div>
+  </div>
   <button class="action-btn btn-maps" onclick="openInMaps()">Open in Maps</button>
 </div>
 <div id="status-bar"><span id="status-text">Connecting...</span></div>
@@ -184,18 +191,31 @@ function openInMaps() {
 }
 
 function openUber() {
-  // Try Uber app deep link first, fallback to web
-  var uberApp = 'uber://?action=setPickup&dropoff[latitude]=' + currentLat + '&dropoff[longitude]=' + currentLng + '&dropoff[nickname]=Their%20Location';
-  var uberWeb = 'https://m.uber.com/ul/?action=setPickup&dropoff[latitude]=' + currentLat + '&dropoff[longitude]=' + currentLng + '&dropoff[nickname]=Their%20Location';
+  // Show the coordinate hint
+  document.getElementById('coord-text').textContent = currentLat.toFixed(6) + ', ' + currentLng.toFixed(6);
+  document.getElementById('uber-hint').style.display = 'block';
 
-  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  if (isIOS) {
-    // Try app, fallback to web after short delay
-    window.location.href = uberApp;
-    setTimeout(function() { window.location.href = uberWeb; }, 1500);
-  } else {
-    window.location.href = uberWeb;
-  }
+  // Open Uber after a short delay so they see the hint
+  setTimeout(function() {
+    var uberApp = 'uber://?action=setPickup&dropoff[latitude]=' + currentLat + '&dropoff[longitude]=' + currentLng + '&dropoff[nickname]=Their%20Location';
+    var uberWeb = 'https://m.uber.com/ul/?action=setPickup&dropoff[latitude]=' + currentLat + '&dropoff[longitude]=' + currentLng + '&dropoff[nickname]=Their%20Location';
+
+    var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    if (isIOS) {
+      window.location.href = uberApp;
+      setTimeout(function() { window.location.href = uberWeb; }, 1500);
+    } else {
+      window.location.href = uberWeb;
+    }
+  }, 800);
+}
+
+function copyCoords() {
+  var text = currentLat.toFixed(6) + ', ' + currentLng.toFixed(6);
+  navigator.clipboard.writeText(text).then(function() {
+    document.getElementById('copy-label').textContent = 'Copied!';
+    setTimeout(function() { document.getElementById('copy-label').textContent = 'Copy'; }, 2000);
+  });
 }
 
 </script>
