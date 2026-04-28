@@ -79,7 +79,7 @@ var KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6
 var HDRS = { 'apikey': KEY, 'Authorization': 'Bearer ' + KEY };
 
 var token = new URLSearchParams(window.location.search).get('token');
-var map, marker, polyline, trail = [], lastUpdate = null, eventId = null;
+var map, marker, lastUpdate = null, eventId = null;
 var currentLat = 0, currentLng = 0;
 
 if (!token) {
@@ -124,16 +124,13 @@ async function load() {
       iconSize: [18, 18], iconAnchor: [9, 9]
     });
     marker = L.marker([lat, lng], { icon: icon }).addTo(map);
-    polyline = L.polyline([], { color: '#dc2626', weight: 3, opacity: 0.7 }).addTo(map);
 
-    var res2 = await fetch(SUPA + '/location_updates?sos_event_id=eq.' + eventId + '&order=recorded_at.asc', { headers: HDRS });
+    var res2 = await fetch(SUPA + '/location_updates?sos_event_id=eq.' + eventId + '&order=recorded_at.desc&limit=1', { headers: HDRS });
     var locs = await res2.json();
 
     if (locs && locs.length > 0) {
-      for (var i = 0; i < locs.length; i++) {
-        addPoint(locs[i].lat, locs[i].lng, new Date(locs[i].recorded_at));
-      }
-    } else {
+      addPoint(locs[0].lat, locs[0].lng, new Date(locs[0].recorded_at));
+    } else if (Math.abs(lat) > 0.001 || Math.abs(lng) > 0.001) {
       addPoint(lat, lng, new Date(ev.triggered_at));
     }
 
@@ -168,12 +165,11 @@ async function poll() {
 }
 
 function addPoint(lat, lng, time) {
-  trail.push([lat, lng]);
+  if (Math.abs(lat) < 0.001 && Math.abs(lng) < 0.001) return;
   lastUpdate = time;
   currentLat = lat;
   currentLng = lng;
   if (marker) marker.setLatLng([lat, lng]);
-  if (polyline) polyline.setLatLngs(trail);
   if (map) map.panTo([lat, lng]);
   updateTimer();
 }
