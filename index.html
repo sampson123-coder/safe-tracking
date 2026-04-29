@@ -69,6 +69,7 @@
     </div>
   </div>
   <button class="action-btn btn-maps" onclick="openInMaps()">Open in Maps</button>
+  <button class="action-btn" id="listen-btn" onclick="toggleListen()" style="background:#16a34a;">🔊 Listen Live</button>
 </div>
 <div id="status-bar"><span id="status-text">Connecting...</span></div>
 
@@ -144,6 +145,7 @@ async function load() {
       setInterval(poll, 5000);
       setInterval(updateTimer, 1000);
     }
+
 
   } catch (err) {
     document.getElementById('load-text').textContent = 'Error: ' + err.message;
@@ -223,6 +225,88 @@ function openUber() {
   } else {
     window.location.href = uberWeb;
   }
+}
+
+var STORAGE = 'https://vzilxgzcuqdutyayycgy.supabase.co/storage/v1';
+var audioPlayer = null;
+var audioQueue = [];
+var seenSegments = {};
+var listening = false;
+var audioPollInterval = null;
+
+function toggleListen() {
+  if (listening) stopListening();
+  else startListening();
+}
+
+function startListening() {
+  if (!eventId) return;
+  if (!audioPlayer) {
+    audioPlayer = new Audio();
+    audioPlayer.addEventListener('ended', playNextSegment);
+    audioPlayer.addEventListener('error', playNextSegment);
+  }
+  listening = true;
+  var btn = document.getElementById('listen-btn');
+  btn.textContent = '◼ Stop listening';
+  btn.style.background = '#dc2626';
+  pollForSegments();
+  audioPollInterval = setInterval(pollForSegments, 5000);
+}
+
+function stopListening() {
+  listening = false;
+  if (audioPlayer) {
+    audioPlayer.pause();
+    audioPlayer.src = '';
+  }
+  audioQueue = [];
+  if (audioPollInterval) clearInterval(audioPollInterval);
+  audioPollInterval = null;
+  var btn = document.getElementById('listen-btn');
+  btn.textContent = '🔊 Listen Live';
+  btn.style.background = '#16a34a';
+}
+
+async function pollForSegments() {
+  if (!eventId) return;
+  try {
+    var res = await fetch(STORAGE + '/object/list/tracking', {
+      method: 'POST',
+      headers: Object.assign({}, HDRS, { 'Content-Type': 'application/json' }),
+      body: JSON.stringify({
+        prefix: 'audio/' + eventId + '/',
+        limit: 1000,
+        sortBy: { column: 'name', order: 'asc' }
+      })
+    });
+    var items = await res.json();
+    if (!Array.isArray(items)) return;
+
+    var added = false;
+    for (var i = 0; i < items.length; i++) {
+      var name = items[i].name;
+      if (!name || seenSegments[name]) continue;
+      seenSegments[name] = true;
+      var url = STORAGE + '/object/public/tracking/audio/' + eventId + '/' + name;
+      audioQueue.push(url);
+      added = true;
+    }
+
+    if (added && audioPlayer && audioPlayer.paused) {
+      playNextSegment();
+    }
+  } catch (e) {
+    console.error('audio poll error', e);
+  }
+}
+
+function playNextSegment() {
+  if (!listening) return;
+  if (audioQueue.length === 0) return;
+  var url = audioQueue.shift();
+  audioPlayer.src = url;
+  audioPlayer.play().catch(function(e) { console.error('audio play error', e); });
 }
 
 function openBolt() {
